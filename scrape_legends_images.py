@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from os import path, mkdir, environ
 
-MINI_PATH = "mini"
-FULL_PATH = "full"
+MINI_PATH = path.join("legends", "mini")
+FULL_PATH = path.join("legends", "full")
 SITE_URL = "https://brawlhalla.com"
 API_URL = "https://api.brawlhalla.com"
 API_KEY = None
