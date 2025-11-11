@@ -1,0 +1,44 @@
+name: Scrape Legends Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape_and_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run scraper script
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          rm ./legends/full/ada.png
+          python scrape_legends_images.py
+
+      - name: Commit and push new images
+        if: always()
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git add legends/mini legends/full
+          if ! git diff --cached --quiet; then
+            git commit -m "Update legend images" || true
+            git push
+          else
+            echo 'No new images to commit.'
+          fi
