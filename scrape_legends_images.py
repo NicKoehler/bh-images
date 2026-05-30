@@ -7,7 +7,6 @@ from typing import Iterable, Mapping
 
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,7 +41,7 @@ def fetch_json(url: str, params: Mapping[str, str] | None = None) -> dict:
     log.debug("Fetching JSON from %s", url)
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
-    return response.json()
+    return response.json()["legends"]
 
 
 def scrape_full_image(full_path: Path, page_url: str) -> None:
@@ -64,13 +63,10 @@ def scrape_full_image(full_path: Path, page_url: str) -> None:
 
 
 def main() -> None:
-    load_dotenv()
-    api_key = os.getenv("API_KEY")
-    if not api_key:
-        raise RuntimeError("Environment variable API_KEY is missing")
-
     log.info("Fetching legend list from API")
-    legends: Iterable[dict] = fetch_json(f"{API_URL}/legend/all", {"api_key": api_key})
+    legends: Iterable[dict] = fetch_json(
+        f"{API_URL}/v1/static/legends", {"max_results": "100"}
+    )
 
     log.info("Scraping website for legend thumbnails")
     soup = BeautifulSoup(
@@ -84,8 +80,8 @@ def main() -> None:
     ]
 
     for legend_meta, tag in zip(legends, legend_links):
-        name_key = legend_meta["legend_name_key"]
-        filename = f"{name_key}.png"
+        legend_id = legend_meta["legend_id"]
+        filename = f"{legend_id}.png"
 
         mini_path = MINI_DIR / filename
         full_path = FULL_DIR / filename
