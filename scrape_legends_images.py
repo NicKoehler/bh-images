@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 from typing import Iterable, Mapping
 
@@ -41,7 +40,7 @@ def fetch_json(url: str, params: Mapping[str, str] | None = None) -> dict:
     log.debug("Fetching JSON from %s", url)
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
-    return response.json()["legends"]
+    return response.json()["legends"][1:]
 
 
 def scrape_full_image(full_path: Path, page_url: str) -> None:
